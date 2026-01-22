@@ -7,56 +7,55 @@
 1. Перейдите в папку проекта.
 2. Соберите и запустите контейнер:
    ```bash
-   docker-compose up -d --build
+   sudo docker compose up -d --build
    ```
-3. Проверьте, что приложение работает локально: `http://localhost:3000`
+3. Ваше приложение будет доступно по адресу: **http://192.168.1.39:3005**
 
 ## 2. Настройка Cloudflare Tunnel
 
-Это позволит "пробросить" ваш локальный `http://localhost:3000` на домен `dashboard.ваш-домен.com`.
+Это позволит "пробросить" ваш локальный сервер в интернет на домен `dashboard.ваш-домен.com`.
 
 1. **Зайдите в Cloudflare Dashboard**:
-   - Откройте раздел **Zero Trust** (в левом меню).
+   - Откройте раздел **Zero Trust**.
    - Networks -> **Tunnels**.
    - Нажмите **Create a Tunnel**.
 
 2. **Создайте туннель**:
    - Connector: **Cloudflared**.
    - Назовите его (например, `home-server`).
+   - Скопируйте команду установки Docker и запустите её на сервере.
 
-3. **Установка коннектора**:
-   - Cloudflare покажет команду для установки (Choose your environment -> Docker).
-   - Скопируйте команду, она выглядит примерно так:
-     ```bash
-     docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <ВАШ_ТОКЕН>
-     ```
-   - Запустите эту команду на своем сервере! Туннель подключится (статус станет "Healthy").
-
-4. **Настройка домена (Public Hostname)**:
-   - Нажмите **Next** в Cloudflare.
-   - **Public Hostname**:
-     - Subdomain: `dashboard` (или как хотите)
-     - Domain: `ваш-домен.com`
-   - **Service**:
+3. **Настройка домена (Public Hostname)**:
+   - **Service**: 
      - Type: `HTTP`
-     - URL: `host.docker.internal:3005` (если туннель тоже в докере) ИЛИ `localhost:3005` (если туннель запущен просто в системе).
-     
-     *Совет: Если не заработает `localhost`, используйте IP адрес вашего компьютера в локальной сети, например `192.168.1.39:3005`.*
+     - URL: `host.docker.internal:3005` (или `192.168.1.39:3005`)
 
-5. **Готово!**
-   Открывайте `https://dashboard.ваш-домен.com`.
+## 3. Обновление версии (Скрипт обновления)
 
-## 3. Обновление версии
-
-Когда вы вносите изменения в код:
+Если вы внесли изменения в код и хотите обновить сервер:
 
 ```bash
-# Остановка
-docker-compose down
+# 1. Заходим в папку
+cd ~/dashboard
 
-# Получение обновлений (если через git)
-git pull
+# 2. Сбрасываем возможные конфликты и обновляем код
+git reset --hard
+git pull origin main
 
-# Пересборка и запуск
-docker-compose up -d --build
+# 3. Перезапускаем контейнер
+sudo docker compose down
+sudo docker compose up -d --build
 ```
+
+### Решение проблем
+
+Если `git pull` выдает ошибку 500 или не работает:
+- Подождите пару минут и попробуйте снова (бывает, GitHub сбоит).
+- Проверьте интернет на сервере (`ping google.com`).
+- Если совсем не работает git, можно просто удалить папку и склонировать заново:
+  ```bash
+  cd ~
+  rm -rf dashboard
+  git clone https://github.com/BavetT1/Dashboard.git dashboard
+  # Не забудьте заново создать .env.local!
+  ```
