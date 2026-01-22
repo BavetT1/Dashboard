@@ -52,6 +52,8 @@ export interface VersionInfo {
     version: string;
     environment: string;
     lastDeployed?: string;
+    newestVersion?: string;
+    type?: string;
 }
 
 export interface ClientVersions {
