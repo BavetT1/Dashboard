@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  # Наше приложение Dashboard
+  dashboard:
+    container_name: dashboard-app
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    # Пробрасываем файл с переменными окружения внутрь
+    volumes:
+      - ./.env.local:/app/.env.local
