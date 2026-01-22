@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import DateFilter, { DateRange } from './DateFilter';
 import MetricsChart from './MetricsChart';
 import VersionsTable from './VersionsTable';
+import CollapsibleSection from './CollapsibleSection';
 import { DailyMetrics, ClientMetrics, VersionInfo } from '@/types';
 
 interface ClientDashboardProps {
@@ -182,45 +183,48 @@ export default function ClientDashboard({ metrics, versions, clientName }: Clien
             />
 
             {/* Таблица детальных данных */}
-            <div className="table-container" style={{ marginTop: '32px' }}>
-                <h3 className="chart-title">Детальные данные по дням ({filteredData.length} записей)</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Дата</th>
-                            <th>SMS</th>
-                            <th>Клики</th>
-                            <th>Конверсия</th>
-                            <th>Заявки</th>
-                            <th>Одобрено</th>
-                            <th>Прибыль</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {[...filteredData]
-                            .sort((a, b) => b.date.localeCompare(a.date))
-                            .slice(0, 50)
-                            .map((day, index) => (
-                                <tr key={index}>
-                                    <td>{new Date(day.date).toLocaleDateString('ru-RU')}</td>
-                                    <td>{formatNumber(day.deliveredSms)}</td>
-                                    <td>{formatNumber(day.uniqueClicks)}</td>
-                                    <td>{formatPercent(day.smsToClickConversion)}</td>
-                                    <td>{formatNumber(day.totalLeads)}</td>
-                                    <td>{formatNumber(day.approvedLeads)}</td>
-                                    <td className={day.profit > 0 ? 'positive' : day.profit < 0 ? 'negative' : ''}>
-                                        {formatCurrency(day.profit)}
-                                    </td>
-                                </tr>
-                            ))}
-                    </tbody>
-                </table>
-                {filteredData.length > 50 && (
-                    <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '16px' }}>
-                        Показано 50 из {filteredData.length} записей
-                    </p>
-                )}
-            </div>
+            <CollapsibleSection title="Детальные данные по дням" count={filteredData.length} defaultOpen={true}>
+                <div className="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>SMS</th>
+                                <th>Клики</th>
+                                <th>Конверсия</th>
+                                <th>Заявки</th>
+                                <th>Одобрено</th>
+                                <th>Прибыль</th>
+                                <th>Доход/SMS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[...filteredData]
+                                .sort((a, b) => b.date.localeCompare(a.date))
+                                .slice(0, 50)
+                                .map((day, index) => (
+                                    <tr key={index}>
+                                        <td>{new Date(day.date).toLocaleDateString('ru-RU')}</td>
+                                        <td>{formatNumber(day.deliveredSms)}</td>
+                                        <td>{formatNumber(day.uniqueClicks)}</td>
+                                        <td>{formatPercent(day.smsToClickConversion)}</td>
+                                        <td>{formatNumber(day.totalLeads)}</td>
+                                        <td>{formatNumber(day.approvedLeads)}</td>
+                                        <td className={day.profit > 0 ? 'positive' : day.profit < 0 ? 'negative' : ''}>
+                                            {formatCurrency(day.profit)}
+                                        </td>
+                                        <td>{day.revenuePerSms.toFixed(2)} ₽</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                    {filteredData.length > 50 && (
+                        <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '16px' }}>
+                            Показано 50 из {filteredData.length} записей
+                        </p>
+                    )}
+                </div>
+            </CollapsibleSection>
         </>
     );
 }
